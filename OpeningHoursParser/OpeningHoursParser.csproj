@@ -6,7 +6,7 @@
     <Exec Command="echo 'Configuration: $(Configuration)'" />
     <Exec
       Condition="'$(Configuration)' == 'Release'"
-      Command="cargo build --release"
+      Command="cargo build --release --frozen"
       WorkingDirectory="."
     />
     <Exec Condition="'$(Configuration)' != 'Release'" Command="cargo build" WorkingDirectory="." />
@@ -14,21 +14,21 @@
   <ItemGroup>
     <Content
       Condition="$([MSBuild]::IsOSPlatform('Windows'))"
-      Include="./target/$(Configuration)/opening_hours_parser.dll"
+      Include="./target/$(Configuration.ToLower())/opening_hours_parser.dll"
     >
       <Link>%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content
       Condition="$([MSBuild]::IsOSPlatform('Linux'))"
-      Include="./target/$(Configuration)/opening_hours_parser.so"
+      Include="./target/$(Configuration.ToLower())/libopening_hours_parser.so"
     >
       <Link>%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content
       Condition="$([MSBuild]::IsOSPlatform('OSX'))"
-      Include="./target/$(Configuration)/opening_hours_parser.dylib"
+      Include="./target/$(Configuration.ToLower())/libopening_hours_parser.dylib"
     >
       <Link>%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

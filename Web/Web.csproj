@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj" />
-    <ProjectReference Include="..\OpeningHoursParser\VartFanSkaViLuncha.OpeningHoursParser.csproj" />
+    <ProjectReference Include="..\OpeningHoursParser\OpeningHoursParser.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" />
