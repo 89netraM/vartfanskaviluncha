@@ -29,18 +29,6 @@
         "resolved": "1.0.2",
         "contentHash": "Y98ba4yeefqrJY+MbCXhvb8x4/mCy8zHeuu/dYKwaM4p0Yu2LToI5ffTg/ErcpPuLnwJBNE229STdhf/dlikIw=="
       },
-      "Microsoft.DotNet.ILCompiler": {
-        "type": "Direct",
-        "requested": "[9.0.6, )",
-        "resolved": "9.0.6",
-        "contentHash": "O7Row/kOgEA3PXpeCVKpDJ9ooAoJDoKoxpZC86voOAwV2NA1jTbQ0Nn0VCuoTT/IvU0T7YNlPldAS0mOrppXmw=="
-      },
-      "Microsoft.NET.ILLink.Tasks": {
-        "type": "Direct",
-        "requested": "[9.0.6, )",
-        "resolved": "9.0.6",
-        "contentHash": "TXy3SbJzGXQbxxIxCjdrp8bwEyTDImyYNpTpd6v7P3JL2Y7dno8EYG7dPezfYTa5SoWKdhbH9cbnwHHs3BR5gA=="
-      },
       "ZiggyCreatures.FusionCache": {
         "type": "Direct",
         "requested": "[2.4.0, )",

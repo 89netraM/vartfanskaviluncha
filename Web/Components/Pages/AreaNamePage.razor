@@ -1,0 +1,100 @@
+@page "/{areaName}"
+@using System.Globalization
+@using VartFanSkaViLuncha.Web.Services
+@inject Random random
+@inject LocationsService locations
+
+@code {
+    [Parameter]
+    public required string AreaName { get; set; }
+
+    private Location? Suggestion { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var suggestions = random.GetItems(await locations.GetLocationsInAsync(AreaName, default), 1);
+        if (suggestions is not [var suggestion])
+        {
+            throw new Exception("Not found");
+        }
+        Suggestion = suggestion;
+    }
+}
+
+<PageTitle>Vart fan ska vi luncha - @AreaName</PageTitle>
+
+<HeadContent>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+
+        body {
+            display: grid;
+            width: 100dvw;
+            height: 100dvh;
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
+            grid-template-areas: "center";
+        }
+
+        #map {
+            grid-area: center;
+            justify-self: stretch;
+            align-self: stretch;
+            cursor: default;
+            pointer-events: none;
+            * {
+                cursor: default;
+            }
+            .leaflet-control-attribution a {
+                cursor: pointer;
+            }
+        }
+
+        main {
+            grid-area: center;
+            justify-self: center;
+            align-self: center;
+            position: relative;
+            z-index: 1000;
+            color: #ffffff;
+            text-align: center;
+            height: 50cqh;
+        }
+    </style>
+</HeadContent>
+
+<div id="map"></div>
+
+<main>
+    <h1>Ni kan väl för fan äta på</h1>
+    <h2>@Suggestion?.Tags?.Name</h2>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+    window.addEventListener("load", () => {
+        const map = L.map(document.getElementById("map"), { zoomControl: false });
+        map.dragging.disable();
+        map.touchZoom.disable();
+        map.doubleClickZoom.disable();
+        map.scrollWheelZoom.disable();
+        map.boxZoom.disable();
+        map.keyboard.disable();
+        if (map.tap) map.tap.disable();
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png", {
+            attribution: "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",
+            subdomains: "abcd",
+            maxZoom: 20
+        }).addTo(map);
+        L.marker([@Suggestion?.Coordinates.Latitude.ToString(CultureInfo.InvariantCulture), @Suggestion?.Coordinates.Longitude.ToString(CultureInfo.InvariantCulture)]).addTo(map);
+        map.setView([@Suggestion?.Coordinates.Latitude.ToString(CultureInfo.InvariantCulture), @Suggestion?.Coordinates.Longitude.ToString(CultureInfo.InvariantCulture)], 15);
+    });
+</script>

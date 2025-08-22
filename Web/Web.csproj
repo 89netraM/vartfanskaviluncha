@@ -2,8 +2,6 @@
   <PropertyGroup>
     <RootNamespace>VartFanSkaViLuncha.Web</RootNamespace>
     <AssemblyName>VartFanSkaViLuncha.Web</AssemblyName>
-    <InvariantGlobalization>true</InvariantGlobalization>
-    <PublishAot>true</PublishAot>
     <UserSecretsId>f9044b0b-827e-4e9f-a6ef-7c2becc97f9f</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
