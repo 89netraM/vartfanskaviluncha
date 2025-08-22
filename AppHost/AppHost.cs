@@ -6,4 +6,6 @@ var redis = builder.AddRedis("cache");
 
 builder.AddProject<Projects.Web>("web").WithHttpHealthCheck("/health").WithReference(redis);
 
+builder.AddDockerComposeEnvironment("docker-compose");
+
 builder.Build().Run();
