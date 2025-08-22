@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "aspire.cli": {
+      "version": "9.3.1-preview.1.25305.6",
+      "commands": [
+        "aspire"
+      ],
+      "rollForward": false
+    },
+    "csharpier": {
+      "version": "1.0.2",
+      "commands": [
+        "csharpier"
+      ],
+      "rollForward": false
+    }
+  }
+}
