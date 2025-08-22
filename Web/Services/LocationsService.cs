@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
@@ -9,6 +7,7 @@ using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -39,28 +38,22 @@ public sealed class LocationsService(
     {
         var request = new HttpRequestMessage(HttpMethod.Post, overpassUri)
         {
-            Content = //new MultipartFormDataContent()
-                // {
-                //     {
-                new StringContent(
-                    $$"""
-                    [out:json][timeout:25];
+            Content = new StringContent(
+                $$"""
+                [out:json][timeout:25];
 
-                    relation
-                    ["boundary"]
-                    ["name"~"{{areaName}}",i]
-                    ->.boundaries;
+                relation
+                ["boundary"]
+                ["name"~"{{areaName}}",i]
+                ->.boundaries;
 
-                    .boundaries map_to_area ->.searchArea;
+                .boundaries map_to_area ->.searchArea;
 
-                    node[amenity~"^(restaurant|cafe|fast_food|pub|bar|ice_cream|food_court)$"](area.searchArea);
+                node[amenity~"^(restaurant|cafe|fast_food|pub|bar|ice_cream|food_court)$"](area.searchArea);
 
-                    out center;
-                    """
-                ),
-            //         "data"
-            //     },
-            // },
+                out center;
+                """
+            ),
             Headers = { { "User-Agent", overpassUserAgent } },
         };
         var response = await httpClient.SendAsync(request, cancellationToken);
@@ -85,11 +78,23 @@ public sealed class LocationsService(
         return [.. overpassResponse.Elements.OfType<Node>().Select(Map)];
     }
 
-    private static Location Map(Node node) =>
-        new(
-            new(node.Longitude, node.Latitude),
-            node.Tags?.ToImmutableDictionary() ?? ImmutableDictionary<string, string>.Empty
-        );
+    private static Location Map(Node node) => new(new(node.Longitude, node.Latitude), Map(node.Tags));
+
+    private static Web.Tags? Map(Tags? tags) =>
+        tags is null ? null : new(tags.Name, tags.OpeningHours, Map(tags.Amenity));
+
+    private static Web.Amenity Map(Amenity amenity) =>
+        amenity switch
+        {
+            Amenity.Restaurant => Web.Amenity.Restaurant,
+            Amenity.Cafe => Web.Amenity.Cafe,
+            Amenity.FastFood => Web.Amenity.FastFood,
+            Amenity.Pub => Web.Amenity.Pub,
+            Amenity.Bar => Web.Amenity.Bar,
+            Amenity.IceCream => Web.Amenity.IceCream,
+            Amenity.FoodCourt => Web.Amenity.FoodCourt,
+            var unknown => throw new UnknownAmenityException(unknown),
+        };
 }
 
 public sealed record OverpassResponse([property: JsonPropertyName("elements")] Element[] Elements);
@@ -101,8 +106,41 @@ public record Element();
 public sealed record Node(
     [property: JsonPropertyName("lon"), JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)] double Longitude,
     [property: JsonPropertyName("lat"), JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)] double Latitude,
-    [property: JsonPropertyName("tags")] Dictionary<string, string>? Tags
+    [property: JsonPropertyName("tags")] Tags? Tags
 ) : Element();
+
+public sealed record Tags(
+    [property: JsonPropertyName("name")] string? Name,
+    [property: JsonPropertyName("amenity")] Amenity Amenity,
+    [property: JsonPropertyName("opening_hours")] string? OpeningHours
+);
+
+[JsonConverter(typeof(JsonStringEnumConverter<Amenity>))]
+public enum Amenity
+{
+    [JsonStringEnumMemberName("restaurant")]
+    Restaurant,
+
+    [JsonStringEnumMemberName("cafe")]
+    Cafe,
+
+    [JsonStringEnumMemberName("fast_food")]
+    FastFood,
+
+    [JsonStringEnumMemberName("pub")]
+    Pub,
+
+    [JsonStringEnumMemberName("bar")]
+    Bar,
+
+    [JsonStringEnumMemberName("ice_cream")]
+    IceCream,
+
+    [JsonStringEnumMemberName("food_court")]
+    FoodCourt,
+}
+
+file sealed class UnknownAmenityException(Amenity? unknownAmenity) : Exception($"Unknown amenity {unknownAmenity}");
 
 [JsonSerializable(typeof(OverpassResponse))]
 public sealed partial class OverpassSerializerContext : JsonSerializerContext;

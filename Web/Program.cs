@@ -1,6 +1,8 @@
+using System;
 using System.Reflection;
 using System.Threading;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,11 +12,7 @@ using VartFanSkaViLuncha.Web.Services;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
-// if (builder.Environment.IsDevelopment())
-// {
 builder.Configuration.AddUserSecrets(Assembly.GetCallingAssembly());
-
-// }
 
 builder.AddServiceDefaults();
 
@@ -22,6 +20,8 @@ builder.AddRedisDistributedCache("cache");
 builder.Services.AddFusionCache();
 
 builder.Services.AddLocationsService();
+
+builder.Services.AddSingleton(Random.Shared);
 
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Add(LocationSerializerContext.Default)
@@ -35,6 +35,20 @@ app.MapGet(
     "/{areaName}",
     async (
         [FromServices] LocationsService locations,
+        [FromServices] Random random,
+        [FromRoute] string areaName,
+        CancellationToken cancellationToken
+    ) =>
+        random.GetItems(await locations.GetLocationsInAsync(areaName, cancellationToken), 1) is [var location]
+            ? Results.Ok(location)
+            : Results.NotFound()
+);
+
+app.MapGet(
+    "/{areaName}/all",
+    async (
+        [FromServices] LocationsService locations,
+        [FromServices] Random random,
         [FromRoute] string areaName,
         CancellationToken cancellationToken
     ) => await locations.GetLocationsInAsync(areaName, cancellationToken)
