@@ -1,5 +1,8 @@
 <Solution>
   <Project Path="Web/Web.csproj" />
+  <Folder Name="/OpeningHoursParser/">
+    <Project Path="OpeningHoursParser/VartFanSkaViLuncha.OpeningHoursParser.csproj" />
+  </Folder>
   <Project Path="AppHost/AppHost.csproj" />
   <Project Path="ServiceDefaults/ServiceDefaults.csproj" />
 </Solution>

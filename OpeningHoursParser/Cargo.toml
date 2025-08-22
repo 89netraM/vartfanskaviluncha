@@ -1,0 +1,12 @@
+[package]
+name = "opening_hours_parser"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "opening_hours_parser"
+crate-type = [ "dylib" ]
+
+[dependencies]
+chrono = "0.4.41"
+opening-hours = "1.1.3"

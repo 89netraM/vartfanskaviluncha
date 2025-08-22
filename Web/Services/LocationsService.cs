@@ -81,7 +81,10 @@ public sealed class LocationsService(
     private static Location Map(Node node) => new(new(node.Longitude, node.Latitude), Map(node.Tags));
 
     private static Web.Tags? Map(Tags? tags) =>
-        tags is null ? null : new(tags.Name, tags.OpeningHours, Map(tags.Amenity));
+        tags is null ? null : new(tags.Name, MapOpeningHours(tags.OpeningHours), Map(tags.Amenity));
+
+    private static bool MapOpeningHours(string? openingHours) =>
+        openingHours is null || OpeningHoursParser.OpeningHoursParser.IsOpenAtLunch(openingHours);
 
     private static Web.Amenity Map(Amenity amenity) =>
         amenity switch

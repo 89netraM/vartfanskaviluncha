@@ -7,7 +7,7 @@ public sealed record Location(Coordinates Coordinates, Tags? Tags);
 
 public sealed record Coordinates(double Longitude, double Latitude);
 
-public sealed record Tags(string? Name, string? OpeningHours, Amenity? Amenity);
+public sealed record Tags(string? Name, bool IsOpenAtLunch, Amenity? Amenity);
 
 [JsonConverter(typeof(JsonStringEnumConverter<Amenity>))]
 public enum Amenity
