@@ -50,6 +50,16 @@
           "Microsoft.Extensions.Caching.Memory": "9.0.0"
         }
       },
+      "ZiggyCreatures.FusionCache.Serialization.SystemTextJson": {
+        "type": "Direct",
+        "requested": "[2.4.0, )",
+        "resolved": "2.4.0",
+        "contentHash": "wbAZYdwJJCx8bD25RG/DvuN9Lbp8Q+pKUODiFmfYwvkvP2yCYc3Utt/c2d96Na+xTzCrNcu1y6xdRBjTbzWG4A==",
+        "dependencies": {
+          "System.Text.Json": "8.0.5",
+          "ZiggyCreatures.FusionCache": "2.4.0"
+        }
+      },
       "Aspire.StackExchange.Redis": {
         "type": "Transitive",
         "resolved": "9.4.1",
@@ -457,6 +467,11 @@
         "type": "Transitive",
         "resolved": "9.0.4",
         "contentHash": "luF2Xba+lTe2GOoNQdZLe8q7K6s7nSpWZl9jIwWNMszN4/Yv0lmxk9HISgMmwdyZ83i3UhAGXaSY9o6IJBUuuA=="
+      },
+      "System.Text.Json": {
+        "type": "Transitive",
+        "resolved": "8.0.5",
+        "contentHash": "0f1B50Ss7rqxXiaBJyzUu9bWFOO2/zSlifZ/UNMdiIpDYe4cY4LQQicP4nirK1OS31I43rn062UIJ1Q9bpmHpg=="
       },
       "System.Threading.RateLimiting": {
         "type": "Transitive",

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using ZiggyCreatures.Caching.Fusion.Internals.Distributed;
 
 namespace VartFanSkaViLuncha.Web;
 
@@ -28,4 +29,5 @@ public enum Amenity
 
 [JsonSerializable(typeof(Location))]
 [JsonSerializable(typeof(Location[]))]
+[JsonSerializable(typeof(FusionCacheDistributedEntry<Location[]>))]
 public sealed partial class LocationSerializerContext : JsonSerializerContext;
