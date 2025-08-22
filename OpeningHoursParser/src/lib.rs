@@ -3,8 +3,8 @@ use std::ffi::{CStr, c_char};
 use chrono::{Datelike, Days, Local, NaiveDateTime, NaiveTime, Weekday};
 use opening_hours::OpeningHours;
 
-#[unsafe(no_mangle)]
-pub extern "C" fn is_open_at_lunch(pattern: *const c_char) -> bool {
+#[no_mangle]
+pub unsafe extern "C" fn is_open_at_lunch(pattern: *const c_char) -> bool {
     let pattern_str = unsafe { CStr::from_ptr(pattern) };
     pattern_str
         .to_str()

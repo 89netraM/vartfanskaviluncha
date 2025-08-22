@@ -1,11 +1,17 @@
 [package]
 name = "opening_hours_parser"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [lib]
 name = "opening_hours_parser"
-crate-type = [ "dylib" ]
+crate-type = [ "cdylib" ]
+
+[profile.dev]
+lto = "fat"
+
+[profile.release]
+lto = "fat"
 
 [dependencies]
 chrono = "0.4.41"
