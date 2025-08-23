@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0@sha256:ae000be75dac94fc40e00f0eee903289e98
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y build-essential curl && apt-get update
+RUN apt-get update && apt-get install -y build-essential curl
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
@@ -21,6 +21,7 @@ COPY ./Web/Web.csproj ./Web/packages.lock.json ./Web/
 RUN dotnet restore ./Web/Web.csproj --locked-mode
 
 COPY ./OpeningHoursParser ./OpeningHoursParser
+RUN touch -am ./OpeningHoursParser/src/lib.rs
 COPY ./ServiceDefaults ./ServiceDefaults
 COPY ./Web ./Web
 
