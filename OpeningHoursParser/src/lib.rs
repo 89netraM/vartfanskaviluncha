@@ -25,7 +25,7 @@ fn weekday_at_12() -> NaiveDateTime {
         .unwrap()
         .naive_local();
     match at_12.weekday() {
-        Weekday::Sat => at_12.checked_sub_days(Days::new(2)).unwrap(),
+        Weekday::Sat => at_12.checked_add_days(Days::new(2)).unwrap(),
         Weekday::Sun => at_12.checked_add_days(Days::new(1)).unwrap(),
         _ => at_12,
     }
