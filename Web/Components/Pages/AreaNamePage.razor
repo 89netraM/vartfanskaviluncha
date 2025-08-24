@@ -32,6 +32,7 @@
             padding: 0;
             overflow: hidden;
             overscroll-behavior: none;
+            font-style: sans-serif;
         }
 
         body {
@@ -66,6 +67,15 @@
             color: #ffffff;
             text-align: center;
             height: 50cqh;
+
+            h2 a[href] {
+                color: #dadada;
+                text-decoration: none;
+
+                &:hover {
+                    color: #ffffff;
+                }
+            }
         }
     </style>
 </HeadContent>
@@ -74,7 +84,7 @@
 
 <main>
     <h1>Ni kan väl för fan äta på</h1>
-    <h2>@Suggestion?.Tags?.Name</h2>
+    <h2><a href="@Suggestion?.Url">@Suggestion?.Name</a></h2>
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"

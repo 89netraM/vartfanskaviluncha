@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,14 +45,19 @@ public sealed class LocationsService(
                 $$"""
                 [out:json][timeout:25];
 
-                relation
-                ["boundary"]
-                ["name"~"{{areaName}}",i]
-                ->.boundaries;
+                relation(52822) -> .sweden;
+                .sweden map_to_area -> .swedenArea;
+
+                relation["boundary"]
+                    ["name"~"{{areaName}}",i]
+                        -> .boundaries;
 
                 .boundaries map_to_area ->.searchArea;
 
-                node[amenity~"^(restaurant|cafe|fast_food|pub|bar|ice_cream|food_court)$"](area.searchArea);
+                node[amenity~"^(restaurant|cafe|fast_food|pub|bar|ice_cream|food_court)$"]
+                    [name]
+                    (area.searchArea)
+                    (area.swedenArea);
 
                 out center;
                 """
@@ -75,19 +83,14 @@ public sealed class LocationsService(
                 cancellationToken
             ) ?? throw new OverpassNullResponseException();
 
-        return [.. overpassResponse.Elements.OfType<Node>().Select(Map)];
+        return [.. overpassResponse.Elements.OfType<Node>().Where(IsOpenAtLunch).Select(Map)];
     }
 
-    private static Location Map(Node node) => new(new(node.Longitude, node.Latitude), Map(node.Tags));
+    private static Location Map(Node node) =>
+        new(node.Tags.Name, new(node.Longitude, node.Latitude), MapAmenity(node.Tags), MapUrl(node.Tags));
 
-    private static Web.Tags? Map(Tags? tags) =>
-        tags is null ? null : new(tags.Name, MapOpeningHours(tags.OpeningHours), Map(tags.Amenity));
-
-    private static bool MapOpeningHours(string? openingHours) =>
-        openingHours is null || OpeningHoursParser.OpeningHoursParser.IsOpenAtLunch(openingHours);
-
-    private static Web.Amenity Map(Amenity amenity) =>
-        amenity switch
+    private static Web.Amenity MapAmenity(Tags tags) =>
+        tags.Amenity switch
         {
             Amenity.Restaurant => Web.Amenity.Restaurant,
             Amenity.Cafe => Web.Amenity.Cafe,
@@ -98,6 +101,51 @@ public sealed class LocationsService(
             Amenity.FoodCourt => Web.Amenity.FoodCourt,
             var unknown => throw new UnknownAmenityException(unknown),
         };
+
+    private static Uri? MapUrl(Tags tags)
+    {
+        if (tags.ExtensionData is null)
+        {
+            return null;
+        }
+
+        if (TryGetUri(tags.ExtensionData, "website:menu", out var websiteMenu))
+        {
+            return websiteMenu;
+        }
+
+        if (TryGetUri(tags.ExtensionData, "website", out var website))
+        {
+            return website;
+        }
+
+        if (TryGetUri(tags.ExtensionData, "contact:website", out var contactWebsite))
+        {
+            return contactWebsite;
+        }
+
+        if (TryGetUri(tags.ExtensionData, "url", out var url))
+        {
+            return url;
+        }
+
+        return null;
+
+        static bool TryGetUri(
+            IReadOnlyDictionary<string, JsonElement> tags,
+            string property,
+            [NotNullWhen(true)] out Uri? uri
+        )
+        {
+            uri = null;
+            return tags.TryGetValue(property, out var element)
+                && element.GetString() is string str
+                && Uri.TryCreate(str, UriKind.Absolute, out uri);
+        }
+    }
+
+    private static bool IsOpenAtLunch(Node node) =>
+        node.Tags.OpeningHours is null || OpeningHoursParser.OpeningHoursParser.IsOpenAtLunch(node.Tags.OpeningHours);
 }
 
 public sealed record OverpassResponse([property: JsonPropertyName("elements")] Element[] Elements);
@@ -109,14 +157,23 @@ public record Element();
 public sealed record Node(
     [property: JsonPropertyName("lon"), JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)] double Longitude,
     [property: JsonPropertyName("lat"), JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)] double Latitude,
-    [property: JsonPropertyName("tags")] Tags? Tags
+    [property: JsonPropertyName("tags")] Tags Tags
 ) : Element();
 
-public sealed record Tags(
-    [property: JsonPropertyName("name")] string? Name,
-    [property: JsonPropertyName("amenity")] Amenity Amenity,
-    [property: JsonPropertyName("opening_hours")] string? OpeningHours
-);
+public sealed class Tags
+{
+    [JsonPropertyName("name")]
+    public required string Name { get; init; }
+
+    [JsonPropertyName("amenity")]
+    public required Amenity Amenity { get; init; }
+
+    [JsonPropertyName("opening_hours")]
+    public string? OpeningHours { get; init; }
+
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement>? ExtensionData { get; set; }
+}
 
 [JsonConverter(typeof(JsonStringEnumConverter<Amenity>))]
 public enum Amenity

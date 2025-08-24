@@ -1,13 +1,12 @@
+using System;
 using System.Text.Json.Serialization;
 using ZiggyCreatures.Caching.Fusion.Internals.Distributed;
 
 namespace VartFanSkaViLuncha.Web;
 
-public sealed record Location(Coordinates Coordinates, Tags? Tags);
+public sealed record Location(string Name, Coordinates Coordinates, Amenity Amenity, Uri? Url);
 
 public sealed record Coordinates(double Longitude, double Latitude);
-
-public sealed record Tags(string? Name, bool IsOpenAtLunch, Amenity? Amenity);
 
 [JsonConverter(typeof(JsonStringEnumConverter<Amenity>))]
 public enum Amenity
